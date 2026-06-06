@@ -4,7 +4,7 @@
 // FRONTEND. The chat UI. Sends the question to /api/chat and renders the
 // streamed answer live. "use client" because we use state + event handlers.
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Message = { role: "user" | "assistant"; content: string };
 
@@ -19,6 +19,17 @@ export default function Home() {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  // Auto-grow the textarea to fit its content (capped in CSS via max-height).
+  // Runs whenever the text changes — including when ask() clears it, which
+  // shrinks the box back to one line.
+  useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    el.style.height = "auto"; // reset so shrinking works too
+    el.style.height = `${el.scrollHeight}px`;
+  }, [input]);
 
   async function ask() {
     const question = input.trim();
@@ -106,14 +117,25 @@ export default function Home() {
       )}
 
       <div className="composer">
-        <input
+        {/* A textarea, not an input: an <input> can't hold a newline at all.
+            Enter sends; Shift+Enter falls through to the default behavior,
+            which in a textarea is inserting a line break. */}
+        <textarea
+          ref={inputRef}
+          rows={1}
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && ask()}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault(); // stop the newline that Enter would insert
+              ask();
+            }
+          }}
           placeholder="e.g. What does cosineSimilarity do?"
         />
         <button onClick={ask} disabled={loading}>Ask</button>
       </div>
+      <p className="hint">Enter ↵ to ask · Shift+Enter for a new line</p>
     </main>
   );
 }
