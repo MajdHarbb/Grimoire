@@ -19,11 +19,35 @@ const EXAMPLE_QUESTIONS = [
   "How is the answer streamed to the browser?",
 ];
 
+// Status lines cycled while waiting for retrieval (the "casting" phase).
+const CASTING_LINES = [
+  "Consulting the grimoire…",
+  "Tracing the runes…",
+  "Turning pages…",
+];
+
 export default function Home() {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
+  const [castIdx, setCastIdx] = useState(0);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const messagesRef = useRef<HTMLDivElement>(null);
+
+  // Rotate the casting status line every 2s while a request is in flight.
+  useEffect(() => {
+    if (!loading) return;
+    const id = setInterval(() => setCastIdx((i) => (i + 1) % CASTING_LINES.length), 2000);
+    return () => clearInterval(id);
+  }, [loading]);
+
+  // Keep the newest tokens in view while an answer streams in. Only while
+  // loading — so scrolling back through history isn't hijacked.
+  useEffect(() => {
+    const el = messagesRef.current;
+    if (!el || !loading) return;
+    el.scrollTop = el.scrollHeight;
+  }, [messages, loading]);
 
   // Auto-grow the textarea to fit its content (capped in CSS via max-height).
   // Runs whenever the text changes — including when ask() clears it, which
@@ -129,16 +153,29 @@ export default function Home() {
       )}
 
       {messages.length > 0 && (
-        <div className="messages">
-          {messages.map((m, i) => (
+        <div className="messages" ref={messagesRef}>
+          {messages.map((m, i) => {
+            const isStreaming = loading && i === messages.length - 1 && m.role === "assistant";
+            return (
             <div key={i} className={`msg ${m.role}`}>
               <span className="who">{m.role === "user" ? "You" : "Grimoire"}</span>
               <div className="bubble">
                 {m.role === "assistant" ? (
                   m.content ? (
-                    <Markdown text={m.content} />
-                  ) : loading && i === messages.length - 1 ? (
-                    "…"
+                    <>
+                      <Markdown text={m.content} />
+                      {isStreaming && <span className="caret" />}
+                    </>
+                  ) : isStreaming ? (
+                    // Loading, phase 1 and 2: before the first token arrives.
+                    // No sources yet -> still retrieving ("casting"); sources
+                    // present -> retrieval done, llama is reading them.
+                    <span className="loader">
+                      <span className="loader-sigil">✦</span>
+                      <span className="loader-text" key={m.sources ? "read" : castIdx}>
+                        {m.sources ? `Reading ${m.sources[0].file}…` : CASTING_LINES[castIdx]}
+                      </span>
+                    </span>
                   ) : (
                     ""
                   )
@@ -158,7 +195,8 @@ export default function Home() {
                 </div>
               )}
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
 

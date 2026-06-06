@@ -317,6 +317,59 @@ h1 {
   border-bottom-left-radius: 6px;
 }
 
+/* ---------- loading: casting sigil, status line, streaming caret ---------- */
+
+.loader {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.loader-sigil {
+  color: var(--ember);
+  animation: cast 1.6s ease-in-out infinite;
+}
+
+@keyframes cast {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(0.92) rotate(0deg);
+    text-shadow: 0 0 4px rgba(240, 169, 96, 0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.12) rotate(90deg);
+    text-shadow: 0 0 16px rgba(240, 169, 96, 0.8);
+  }
+}
+
+.loader-text {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1rem;
+  color: var(--muted);
+  animation: rise 0.5s ease both; /* re-runs on each status change via key= */
+}
+
+/* The blinking block at the end of a streaming answer. */
+.caret {
+  display: inline-block;
+  width: 0.55em;
+  height: 1.1em;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  background: var(--ember);
+  border-radius: 2px;
+  animation: blink 1s steps(2, start) infinite;
+}
+
+@keyframes blink {
+  to {
+    visibility: hidden;
+  }
+}
+
 /* ---------- source chips under answers ---------- */
 
 .sources {
