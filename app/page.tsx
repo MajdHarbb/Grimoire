@@ -8,6 +8,13 @@ import { useState } from "react";
 
 type Message = { role: "user" | "assistant"; content: string };
 
+// Shown in the empty state; clicking one fills the composer.
+const EXAMPLE_QUESTIONS = [
+  "How does the app compare two vectors for similarity?",
+  "What does ingest.ts do?",
+  "How is the answer streamed to the browser?",
+];
+
 export default function Home() {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
@@ -61,17 +68,42 @@ export default function Home() {
 
   return (
     <main className="chat">
-      <h1>Grimoire</h1>
-      <p className="tagline">Ask your codebase anything.</p>
+      <header className="masthead">
+        <span className="sigil">✦</span>
+        <h1>Grimoire</h1>
+        <p className="tagline">Ask your codebase anything.</p>
+      </header>
 
-      <div className="messages">
-        {messages.map((m, i) => (
-          <div key={i} className={`msg ${m.role}`}>
-            <span className="who">{m.role === "user" ? "You" : "Grimoire"}</span>
-            <div className="bubble">{m.content || (loading && i === messages.length - 1 ? "…" : "")}</div>
+      {/* Empty state: explain the name, offer starting questions.
+          Disappears as soon as the first message exists. */}
+      {messages.length === 0 && (
+        <div className="hero">
+          <div>
+            <div className="hero-word">gri·moire</div>
+            <div className="hero-phonetic">/ɡrim-ˈwär/ · noun</div>
           </div>
-        ))}
-      </div>
+          <p className="hero-definition">a book of spells.</p>
+          <p className="hero-sub">This one has read your code. Ask it anything.</p>
+          <div className="suggestions">
+            {EXAMPLE_QUESTIONS.map((q) => (
+              <button key={q} className="suggestion" onClick={() => setInput(q)}>
+                {q}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {messages.length > 0 && (
+        <div className="messages">
+          {messages.map((m, i) => (
+            <div key={i} className={`msg ${m.role}`}>
+              <span className="who">{m.role === "user" ? "You" : "Grimoire"}</span>
+              <div className="bubble">{m.content || (loading && i === messages.length - 1 ? "…" : "")}</div>
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="composer">
         <input

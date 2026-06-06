@@ -1,17 +1,24 @@
-/* app/globals.css — Grimoire: "arcane tome meets terminal" */
+/* app/globals.css — Grimoire: modern arcane.
+   Dark mystical identity, modern-product execution: soft radii, layered
+   translucent surfaces, candlelight used sparingly. Serif (Cormorant) only
+   for the title and ritual copy; Geist Sans for UI; mono for code only. */
 
 @import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=JetBrains+Mono:wght@400;500&display=swap");
 
 :root {
-  --ink: #0d0b14; /* deep arcane background */
-  --ink-2: #15121f; /* raised surfaces */
-  --parchment: #e8e1d3; /* primary text, aged paper */
-  --muted: #8a8499; /* secondary text */
+  --ink: #0c0a13; /* deep arcane background */
+  --ink-2: rgba(28, 24, 42, 0.55); /* raised glassy surfaces */
+  --parchment: #ece5d8; /* primary text, aged paper */
+  --muted: #8d87a0; /* secondary text */
   --ember: #d98c4a; /* primary accent, candle/ember */
   --ember-glow: #f0a960; /* brighter accent */
-  --arcane: #7c6db0; /* secondary accent, mystical violet */
-  --border: #2a2436;
-  --user-bg: #1d1830;
+  --arcane: #8b7cc4; /* secondary accent, mystical violet */
+  --border: rgba(170, 150, 220, 0.12); /* faint violet hairline */
+  --radius: 16px;
+  --radius-sm: 10px;
+  --font-ui: var(--font-geist-sans), system-ui, sans-serif;
+  --font-display: "Cormorant Garamond", serif;
+  --font-code: "JetBrains Mono", monospace;
 }
 
 * {
@@ -22,22 +29,44 @@
 
 body {
   background: var(--ink);
-  /* subtle radial glow, like candlelight on a page */
-  background-image:
-    radial-gradient(
-      ellipse 80% 50% at 50% -10%,
-      rgba(217, 140, 74, 0.08),
-      transparent
-    ),
-    radial-gradient(
-      ellipse 60% 40% at 80% 110%,
-      rgba(124, 109, 176, 0.06),
-      transparent
-    );
-  background-attachment: fixed;
   color: var(--parchment);
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--font-ui);
   min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Living background, layer 1: two candlelight glows that drift very slowly.
+   A fixed pseudo-element so the glow doesn't scroll away with the page. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: -20%;
+  z-index: -2;
+  background:
+    radial-gradient(ellipse 50% 40% at 30% 0%, rgba(217, 140, 74, 0.1), transparent 70%),
+    radial-gradient(ellipse 45% 35% at 75% 100%, rgba(124, 109, 176, 0.09), transparent 70%);
+  animation: drift 45s ease-in-out infinite alternate;
+}
+
+@keyframes drift {
+  from {
+    transform: translate(0, 0) scale(1);
+  }
+  to {
+    transform: translate(3%, 2%) scale(1.06);
+  }
+}
+
+/* Living background, layer 2: faint grain so the dark isn't flat.
+   An inline SVG turbulence texture — no image file needed. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 .chat {
@@ -46,12 +75,21 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding: 3rem 1.5rem 1.5rem;
+  padding: 2.5rem 1.5rem 1.5rem;
+}
+
+/* ---------- masthead ---------- */
+
+.masthead {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
 }
 
 h1 {
-  font-family: "Cormorant Garamond", serif;
-  font-size: 3.5rem;
+  font-family: var(--font-display);
+  font-size: 2.4rem;
   font-weight: 600;
   letter-spacing: 0.02em;
   background: linear-gradient(135deg, var(--parchment), var(--ember-glow));
@@ -61,13 +99,104 @@ h1 {
   line-height: 1;
 }
 
-.tagline {
-  font-family: "Cormorant Garamond", serif;
-  font-style: italic;
-  font-size: 1.25rem;
-  color: var(--muted);
-  margin-bottom: 2.5rem;
+/* The sigil before the title: a slow candle-like flicker. */
+.sigil {
+  color: var(--ember);
+  font-size: 1.3rem;
+  animation: flicker 4s ease-in-out infinite;
 }
+
+@keyframes flicker {
+  0%,
+  100% {
+    opacity: 0.9;
+    text-shadow: 0 0 12px rgba(240, 169, 96, 0.7);
+  }
+  50% {
+    opacity: 0.55;
+    text-shadow: 0 0 4px rgba(240, 169, 96, 0.3);
+  }
+}
+
+.tagline {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.05rem;
+  color: var(--muted);
+}
+
+/* ---------- empty state: the name, explained ---------- */
+
+.hero {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 1rem;
+  animation: rise 0.7s ease both;
+}
+
+.hero-word {
+  font-family: var(--font-display);
+  font-size: 3.2rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, var(--parchment), var(--ember-glow));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-phonetic {
+  font-family: var(--font-code);
+  font-size: 0.8rem;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+}
+
+.hero-definition {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.35rem;
+  color: var(--parchment);
+}
+
+.hero-sub {
+  font-size: 0.95rem;
+  color: var(--muted);
+  margin-bottom: 1.25rem;
+}
+
+.suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+}
+
+.suggestion {
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  color: var(--parchment);
+  background: var(--ink-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.55rem 1.1rem;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition:
+    border-color 0.25s,
+    box-shadow 0.25s,
+    transform 0.15s;
+}
+.suggestion:hover {
+  border-color: rgba(217, 140, 74, 0.45);
+  box-shadow: 0 0 18px rgba(217, 140, 74, 0.15);
+  transform: translateY(-1px);
+}
+
+/* ---------- messages ---------- */
 
 .messages {
   flex: 1;
@@ -81,7 +210,7 @@ h1 {
 .msg {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.4rem;
   animation: rise 0.4s ease both;
 }
 .msg.user {
@@ -91,7 +220,7 @@ h1 {
 @keyframes rise {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -100,9 +229,9 @@ h1 {
 }
 
 .who {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   text-transform: uppercase;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.18em;
   color: var(--ember);
 }
 .msg.user .who {
@@ -110,19 +239,39 @@ h1 {
 }
 
 .bubble {
+  position: relative;
   max-width: 90%;
-  padding: 0.85rem 1.1rem;
-  border-radius: 4px;
-  line-height: 1.65;
-  font-size: 0.9rem;
+  padding: 1rem 1.2rem;
+  border-radius: var(--radius);
+  line-height: 1.7;
+  font-size: 0.92rem;
   white-space: pre-wrap;
   border: 1px solid var(--border);
   background: var(--ink-2);
+  backdrop-filter: blur(10px);
 }
+
+/* Candlelight on the page: a soft ember line along the answer's top edge. */
+.msg.assistant .bubble::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(240, 169, 96, 0.5), transparent);
+}
+
 .msg.user .bubble {
-  background: var(--user-bg);
-  border-color: transparent;
+  background: rgba(124, 109, 176, 0.14);
+  border-color: rgba(139, 124, 196, 0.2);
+  border-bottom-right-radius: 6px;
 }
+.msg.assistant .bubble {
+  border-bottom-left-radius: 6px;
+}
+
+/* ---------- composer ---------- */
 
 .composer {
   display: flex;
@@ -135,18 +284,19 @@ h1 {
   flex: 1;
   background: var(--ink-2);
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   padding: 0.85rem 1rem;
   color: var(--parchment);
-  font-family: inherit;
-  font-size: 0.9rem;
+  font-family: var(--font-ui);
+  font-size: 0.92rem;
   outline: none;
+  backdrop-filter: blur(8px);
   transition:
     border-color 0.2s,
     box-shadow 0.2s;
 }
 .composer input:focus {
-  border-color: var(--ember);
+  border-color: rgba(217, 140, 74, 0.55);
   box-shadow: 0 0 0 3px rgba(217, 140, 74, 0.12);
 }
 .composer input::placeholder {
@@ -154,23 +304,22 @@ h1 {
 }
 
 .composer button {
-  background: var(--ember);
+  background: linear-gradient(135deg, var(--ember), #c47a3c);
   color: var(--ink);
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   padding: 0 1.5rem;
-  font-family: inherit;
-  font-weight: 500;
+  font-family: var(--font-ui);
+  font-weight: 600;
   font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.04em;
   cursor: pointer;
   transition:
-    background 0.2s,
+    box-shadow 0.2s,
     transform 0.1s;
 }
 .composer button:hover:not(:disabled) {
-  background: var(--ember-glow);
+  box-shadow: 0 0 20px rgba(217, 140, 74, 0.35);
 }
 .composer button:active:not(:disabled) {
   transform: scale(0.97);
