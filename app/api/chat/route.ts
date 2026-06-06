@@ -11,6 +11,16 @@ import { generate } from "@/lib/ollama";
 // lighter "edge" runtime can't do.
 export const runtime = "nodejs";
 
+// Below this best-match score we refuse instead of letting llama improvise.
+// Calibrated with `npx tsx scripts/eval.ts`: unanswerable questions score
+// up to ~0.455 against this index, real questions at least ~0.509. Re-check
+// after re-ingesting a different codebase — the gap can move.
+const SCORE_THRESHOLD = 0.48;
+
+const REFUSAL = `*The tome holds no page on that.*
+
+None of the indexed code matches your question well enough to answer from. Try asking about something in this codebase.`;
+
 export async function POST(req: Request) {
   // 1. Get the question from the request body the frontend sends.
   const { question } = await req.json();
@@ -47,6 +57,24 @@ ${context}`;
   }));
 
   const encoder = new TextEncoder();
+
+  // The I-don't-know guard: when even the BEST match is weak, answering
+  // from these chunks would be improvisation, not retrieval. Send the same
+  // header (so the UI still shows what was weakly matched — hover a chip to
+  // see its low score) followed by a fixed refusal. llama is never called.
+  const bestScore = hits[0]?.score ?? 0;
+  if (bestScore < SCORE_THRESHOLD) {
+    const refusalStream = new ReadableStream({
+      start(controller) {
+        controller.enqueue(encoder.encode(JSON.stringify({ sources }) + "\n"));
+        controller.enqueue(encoder.encode(REFUSAL));
+        controller.close();
+      },
+    });
+    return new Response(refusalStream, {
+      headers: { "Content-Type": "text/plain; charset=utf-8" },
+    });
+  }
   const stream = new ReadableStream({
     async start(controller) {
       // Stream protocol: ONE JSON line first ({"sources":[...]}\n), then the
