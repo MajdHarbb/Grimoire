@@ -28,7 +28,18 @@ const PRODUCTION_K = 4;
 
 type CaseResult = EvalCase & {
   rank: number | null; // 1-based rank of the first chunk from the expected file, null = not in top RANK_DEPTH
+  bestScore: number; // similarity of the #1 retrieved chunk (whatever file it's from)
 };
+
+// Questions the index can NOT answer. Their best scores tell us where the
+// "no real match" zone lies; the gap between these and the real questions'
+// best scores is where the chat route's I-don't-know threshold belongs.
+const NONSENSE_PROBES = [
+  "How do I bake sourdough bread?",
+  "What is the capital of Mongolia?",
+  "Best exercises for lower back pain?",
+  "How do I renew my passport?",
+];
 
 function summarize(results: CaseResult[]) {
   const n = results.length;
@@ -62,15 +73,16 @@ async function main() {
     process.exit(1);
   }
 
-  // Embed every question in one batch. embedOne() (what the chat route uses)
-  // is just embedBatch() with a single input, so this measures exactly what
-  // production does — only faster.
-  const questionVectors = await embedBatch(cases.map((c) => c.question));
+  // Embed every question in one batch — real cases AND nonsense probes
+  // together. embedOne() (what the chat route uses) is just embedBatch()
+  // with a single input, so this measures exactly what production does.
+  const allQuestions = [...cases.map((c) => c.question), ...NONSENSE_PROBES];
+  const vectors = await embedBatch(allQuestions);
 
   const results: CaseResult[] = cases.map((c, i) => {
-    const hits = retrieve(questionVectors[i], store, RANK_DEPTH);
+    const hits = retrieve(vectors[i], store, RANK_DEPTH);
     const idx = hits.findIndex((h) => h.chunk.source === c.expectedSource);
-    return { ...c, rank: idx === -1 ? null : idx + 1 };
+    return { ...c, rank: idx === -1 ? null : idx + 1, bestScore: hits[0].score };
   });
 
   // Per-case table: one line per question so a before/after diff is readable.
@@ -79,9 +91,22 @@ async function main() {
     const mark = r.rank !== null && r.rank <= PRODUCTION_K ? "✓" : "✗";
     const rank = r.rank === null ? `not in top ${RANK_DEPTH}` : `rank ${r.rank}`;
     console.log(
-      `${mark} [${r.type.padEnd(8)}] ${rank.padEnd(13)} ${r.expectedSource.padEnd(25)} ${r.question}`
+      `${mark} [${r.type.padEnd(8)}] ${rank.padEnd(13)} best ${r.bestScore.toFixed(3)}  ${r.expectedSource.padEnd(25)} ${r.question}`
     );
   }
+
+  // Calibration block: where do unanswerable questions land? The chat
+  // route's I-don't-know threshold should sit between the highest nonsense
+  // score and the lowest real-question score.
+  console.log("\ncalibration — best scores for unanswerable questions:");
+  const nonsenseBest = NONSENSE_PROBES.map((q, i) => {
+    const hits = retrieve(vectors[cases.length + i], store, 1);
+    console.log(`  ${hits[0].score.toFixed(3)}  ${q}`);
+    return hits[0].score;
+  });
+  const lowestReal = Math.min(...results.map((r) => r.bestScore));
+  const highestNonsense = Math.max(...nonsenseBest);
+  console.log(`  → real questions bottom out at ${lowestReal.toFixed(3)}, nonsense tops out at ${highestNonsense.toFixed(3)}`);
 
   // Summary: overall plus the semantic/keyword split. Hybrid search should
   // lift the keyword row without dropping the semantic row.
