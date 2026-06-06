@@ -31,6 +31,7 @@ export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [castIdx, setCastIdx] = useState(0);
+  const [copiedIdx, setCopiedIdx] = useState<number | null>(null); // which message just got copied
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
 
@@ -48,6 +49,12 @@ export default function Home() {
     if (!el || !loading) return;
     el.scrollTop = el.scrollHeight;
   }, [messages, loading]);
+
+  async function copyMessage(i: number, content: string) {
+    await navigator.clipboard.writeText(content);
+    setCopiedIdx(i);
+    setTimeout(() => setCopiedIdx(null), 1500); // let the ✓ linger briefly
+  }
 
   // Auto-grow the textarea to fit its content (capped in CSS via max-height).
   // Runs whenever the text changes — including when ask() clears it, which
@@ -158,7 +165,18 @@ export default function Home() {
             const isStreaming = loading && i === messages.length - 1 && m.role === "assistant";
             return (
             <div key={i} className={`msg ${m.role}`}>
-              <span className="who">{m.role === "user" ? "You" : "Grimoire"}</span>
+              <span className="who">
+                {m.role === "user" ? "You" : "Grimoire"}
+                {m.role === "assistant" && m.content && !isStreaming && (
+                  <button
+                    className="copy"
+                    onClick={() => copyMessage(i, m.content)}
+                    title="Copy answer"
+                  >
+                    {copiedIdx === i ? "✓ copied" : "copy"}
+                  </button>
+                )}
+              </span>
               <div className="bubble">
                 {m.role === "assistant" ? (
                   m.content ? (

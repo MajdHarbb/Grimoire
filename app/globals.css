@@ -229,6 +229,9 @@ h1 {
 }
 
 .who {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
   font-size: 0.68rem;
   text-transform: uppercase;
   letter-spacing: 0.18em;
@@ -236,6 +239,29 @@ h1 {
 }
 .msg.user .who {
   color: var(--arcane);
+}
+
+/* Copy button: invisible until the message is hovered. */
+.copy {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 0.1rem 0.5rem;
+  font-family: var(--font-ui);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s, border-color 0.2s, color 0.2s;
+}
+.msg:hover .copy {
+  opacity: 1;
+}
+.copy:hover {
+  border-color: var(--border);
+  color: var(--parchment);
 }
 
 .bubble {
