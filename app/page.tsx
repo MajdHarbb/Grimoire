@@ -5,6 +5,7 @@
 // streamed answer live. "use client" because we use state + event handlers.
 
 import { useEffect, useRef, useState } from "react";
+import { Markdown } from "./components/markdown";
 
 type Message = { role: "user" | "assistant"; content: string };
 
@@ -110,7 +111,19 @@ export default function Home() {
           {messages.map((m, i) => (
             <div key={i} className={`msg ${m.role}`}>
               <span className="who">{m.role === "user" ? "You" : "Grimoire"}</span>
-              <div className="bubble">{m.content || (loading && i === messages.length - 1 ? "…" : "")}</div>
+              <div className="bubble">
+                {m.role === "assistant" ? (
+                  m.content ? (
+                    <Markdown text={m.content} />
+                  ) : loading && i === messages.length - 1 ? (
+                    "…"
+                  ) : (
+                    ""
+                  )
+                ) : (
+                  m.content
+                )}
+              </div>
             </div>
           ))}
         </div>
