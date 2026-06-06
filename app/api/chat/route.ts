@@ -31,8 +31,7 @@ export async function POST(req: Request) {
   const systemPrompt = `You answer questions about a codebase using ONLY the context below.
 Each context block is numbered and labelled with its source file.
 When you use information from a block, cite it inline like [1] or [2].
-If the answer isn't in the context, say you don't know — do not invent code.
-
+Use the provided code context to answer. Explain what the code does, even if you have to reason about it. Only say you don't know if the context truly contains nothing relevant. When you use a block, cite it like [1].
 CONTEXT:
 ${context}`;
 
