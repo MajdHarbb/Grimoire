@@ -1,0 +1,77 @@
+[
+  {
+    "question": "How does the app compare two vectors for similarity?",
+    "expectedSource": "lib/rag.ts",
+    "type": "semantic"
+  },
+  {
+    "question": "How are text files split into overlapping pieces before embedding?",
+    "expectedSource": "lib/rag.ts",
+    "type": "semantic"
+  },
+  {
+    "question": "How does the backend build the prompt with numbered context blocks for citations?",
+    "expectedSource": "app/api/chat/route.ts",
+    "type": "semantic"
+  },
+  {
+    "question": "Where are the embedded chunks saved to disk and loaded back?",
+    "expectedSource": "lib/store.ts",
+    "type": "semantic"
+  },
+  {
+    "question": "How does the app turn text into embedding vectors?",
+    "expectedSource": "lib/embeddings.ts",
+    "type": "semantic"
+  },
+  {
+    "question": "How does the chat interface render messages and stream the answer as it arrives?",
+    "expectedSource": "app/page.tsx",
+    "type": "semantic"
+  },
+  {
+    "question": "Which folders are skipped when scanning a codebase for files to index?",
+    "expectedSource": "scripts/ingest.ts",
+    "type": "semantic"
+  },
+  {
+    "question": "How do we talk to the local llama model and stream its reply token by token?",
+    "expectedSource": "lib/ollama.ts",
+    "type": "semantic"
+  },
+  {
+    "question": "What does ingest.ts do?",
+    "expectedSource": "scripts/ingest.ts",
+    "type": "keyword"
+  },
+  {
+    "question": "Where is STORE_PATH defined?",
+    "expectedSource": "lib/store.ts",
+    "type": "keyword"
+  },
+  {
+    "question": "What does the embedBatch function do?",
+    "expectedSource": "lib/embeddings.ts",
+    "type": "keyword"
+  },
+  {
+    "question": "Where is cosineSimilarity implemented?",
+    "expectedSource": "lib/rag.ts",
+    "type": "keyword"
+  },
+  {
+    "question": "What does route.ts do?",
+    "expectedSource": "app/api/chat/route.ts",
+    "type": "keyword"
+  },
+  {
+    "question": "Which file defines the StoredChunk type?",
+    "expectedSource": "lib/store.ts",
+    "type": "keyword"
+  },
+  {
+    "question": "What are the hard constraints listed in CLAUDE.md?",
+    "expectedSource": "CLAUDE.md",
+    "type": "keyword"
+  }
+]
