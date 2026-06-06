@@ -7,7 +7,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Markdown } from "./components/markdown";
 
-type Message = { role: "user" | "assistant"; content: string };
+// What the backend retrieved for an answer; n matches the [n] citations.
+type Source = { n: number; file: string; score: number };
+
+type Message = { role: "user" | "assistant"; content: string; sources?: Source[] };
 
 // Shown in the empty state; clicking one fills the composer.
 const EXAMPLE_QUESTIONS = [
@@ -51,16 +54,35 @@ export default function Home() {
 
       if (!res.body) throw new Error("No response stream");
 
-      // Read the streamed bytes, decode to text, and append each piece to
-      // the last (assistant) message so it grows on screen as it arrives.
+      // Read the streamed bytes. The FIRST line is a JSON header with the
+      // retrieved sources; everything after it is the answer text, which we
+      // append to the last (assistant) message so it grows as it arrives.
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
+      let buffer = "";
+      let headerParsed = false;
       let accumulated = "";
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        accumulated += decoder.decode(value, { stream: true });
+        buffer += decoder.decode(value, { stream: true });
+
+        if (!headerParsed) {
+          const nl = buffer.indexOf("\n");
+          if (nl === -1) continue; // header not complete yet, keep buffering
+          const header = JSON.parse(buffer.slice(0, nl)) as { sources: Source[] };
+          buffer = buffer.slice(nl + 1); // the rest is answer text
+          headerParsed = true;
+          setMessages((m) => {
+            const copy = [...m];
+            copy[copy.length - 1] = { ...copy[copy.length - 1], sources: header.sources };
+            return copy;
+          });
+        }
+
+        accumulated += buffer;
+        buffer = "";
         setMessages((m) => {
           const copy = [...m];
           copy[copy.length - 1] = { ...copy[copy.length - 1], content: accumulated };
@@ -124,6 +146,17 @@ export default function Home() {
                   m.content
                 )}
               </div>
+              {/* The pages the answer was drawn from; [n] citations in the
+                  text refer to these. Hover a chip to see its match score. */}
+              {m.sources && (
+                <div className="sources">
+                  {m.sources.map((s) => (
+                    <span key={s.n} className="source-chip" title={`similarity ${s.score}`}>
+                      <span className="source-n">{s.n}</span> {s.file}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           ))}
         </div>

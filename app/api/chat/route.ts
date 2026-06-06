@@ -38,9 +38,23 @@ ${context}`;
   // 5. Stream llama's answer back to the browser as it's generated.
   //    We wrap YOUR generate() generator in a Web ReadableStream, which is
   //    what a Response can stream from.
+  // The retrieved sources, in the same order as the numbered context blocks,
+  // so "[2]" in the answer text refers to sources[1] in this list.
+  const sources = hits.map((h, i) => ({
+    n: i + 1,
+    file: h.chunk.source,
+    score: Number(h.score.toFixed(3)),
+  }));
+
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
     async start(controller) {
+      // Stream protocol: ONE JSON line first ({"sources":[...]}\n), then the
+      // raw answer text. The frontend buffers up to the first newline, parses
+      // the header, and renders everything after it as the streamed answer.
+      // This also means the chips appear BEFORE llama's slow first token —
+      // the UI can show "reading lib/rag.ts…" while the model warms up.
+      controller.enqueue(encoder.encode(JSON.stringify({ sources }) + "\n"));
       try {
         for await (const piece of generate([
           { role: "system", content: systemPrompt },

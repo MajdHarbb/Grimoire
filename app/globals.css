@@ -317,6 +317,46 @@ h1 {
   border-bottom-left-radius: 6px;
 }
 
+/* ---------- source chips under answers ---------- */
+
+.sources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  max-width: 90%;
+}
+
+.source-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-code);
+  font-size: 0.7rem;
+  color: var(--muted);
+  background: rgba(28, 24, 42, 0.4);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.25rem 0.7rem 0.25rem 0.3rem;
+  cursor: default;
+  transition: border-color 0.2s, color 0.2s;
+}
+.source-chip:hover {
+  border-color: rgba(217, 140, 74, 0.4);
+  color: var(--parchment);
+}
+
+.source-n {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.2rem;
+  height: 1.2rem;
+  border-radius: 50%;
+  background: rgba(217, 140, 74, 0.15);
+  color: var(--ember-glow);
+  font-size: 0.65rem;
+}
+
 /* ---------- composer ---------- */
 
 .composer {
