@@ -239,7 +239,9 @@ export default function Home() {
           }}
           placeholder="e.g. What does cosineSimilarity do?"
         />
-        <button onClick={ask} disabled={loading}>Ask</button>
+        <button onClick={ask} disabled={loading} aria-label="Ask" title="Ask">
+          ✦
+        </button>
       </div>
       <p className="hint">Enter ↵ to ask · Shift+Enter for a new line</p>
     </main>

@@ -438,20 +438,35 @@ h1 {
 
 /* ---------- composer ---------- */
 
+/* One glassy card holding the textarea and the send button — no hard
+   divider line above, the card's own depth separates it from the chat. */
 .composer {
   display: flex;
   align-items: flex-end; /* button hugs the bottom as the textarea grows */
-  gap: 0.6rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid var(--border);
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding: 0.45rem 0.45rem 0.45rem 1.15rem;
+  background: var(--ink-2);
+  border: 1px solid var(--border);
+  border-radius: 26px;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.4);
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+.composer:focus-within {
+  border-color: rgba(217, 140, 74, 0.45);
+  box-shadow:
+    0 0 0 3px rgba(217, 140, 74, 0.1),
+    0 10px 36px rgba(0, 0, 0, 0.4);
 }
 
 .composer textarea {
   flex: 1;
-  background: var(--ink-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 0.85rem 1rem;
+  background: none;
+  border: none;
+  padding: 0.62rem 0;
   color: var(--parchment);
   font-family: var(--font-ui);
   font-size: 0.92rem;
@@ -460,39 +475,33 @@ h1 {
   resize: none; /* we auto-grow it from JS instead of a drag handle */
   max-height: 10.5em; /* ~6 lines; beyond that it scrolls */
   overflow-y: hidden; /* JS enables scrolling only past the cap */
-  backdrop-filter: blur(8px);
-  transition:
-    border-color 0.2s,
-    box-shadow 0.2s;
-}
-.composer textarea:focus {
-  border-color: rgba(217, 140, 74, 0.55);
-  box-shadow: 0 0 0 3px rgba(217, 140, 74, 0.12);
 }
 .composer textarea::placeholder {
   color: var(--muted);
 }
 
+/* Circular send button living inside the card. */
 .composer button {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
   background: linear-gradient(135deg, var(--ember), #c47a3c);
   color: var(--ink);
   border: none;
-  border-radius: var(--radius-sm);
-  padding: 0.85rem 1.5rem;
-  font-family: var(--font-ui);
-  font-weight: 600;
-  font-size: 0.85rem;
-  letter-spacing: 0.04em;
+  border-radius: 50%;
+  font-size: 1.05rem;
   cursor: pointer;
   transition:
     box-shadow 0.2s,
     transform 0.1s;
 }
 .composer button:hover:not(:disabled) {
-  box-shadow: 0 0 20px rgba(217, 140, 74, 0.35);
+  box-shadow: 0 0 20px rgba(217, 140, 74, 0.45);
 }
 .composer button:active:not(:disabled) {
-  transform: scale(0.97);
+  transform: scale(0.94);
 }
 .composer button:disabled {
   opacity: 0.4;
