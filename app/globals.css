@@ -459,6 +459,7 @@ h1 {
   outline: none;
   resize: none; /* we auto-grow it from JS instead of a drag handle */
   max-height: 10.5em; /* ~6 lines; beyond that it scrolls */
+  overflow-y: hidden; /* JS enables scrolling only past the cap */
   backdrop-filter: blur(8px);
   transition:
     border-color 0.2s,

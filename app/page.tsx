@@ -58,12 +58,16 @@ export default function Home() {
 
   // Auto-grow the textarea to fit its content (capped in CSS via max-height).
   // Runs whenever the text changes — including when ask() clears it, which
-  // shrinks the box back to one line.
+  // shrinks the box back to one line. The scrollbar only turns on once the
+  // content actually passes the cap; otherwise browsers reserve a gutter
+  // for it even on a single line.
   useEffect(() => {
     const el = inputRef.current;
     if (!el) return;
     el.style.height = "auto"; // reset so shrinking works too
     el.style.height = `${el.scrollHeight}px`;
+    const max = parseFloat(getComputedStyle(el).maxHeight);
+    el.style.overflowY = el.scrollHeight > max ? "auto" : "hidden";
   }, [input]);
 
   async function ask() {
