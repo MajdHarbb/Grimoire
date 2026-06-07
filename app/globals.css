@@ -28,7 +28,12 @@
 }
 
 body {
-  background: var(--ink);
+  /* a faint lift at the top and darkened corners (vignette) so the canvas
+     reads as lit space, not flat black */
+  background:
+    radial-gradient(ellipse 140% 90% at 50% 50%, transparent 55%, rgba(0, 0, 0, 0.45) 100%),
+    radial-gradient(ellipse 120% 70% at 50% 0%, #161126 0%, var(--ink) 60%);
+  background-attachment: fixed;
   color: var(--parchment);
   font-family: var(--font-ui);
   min-height: 100vh;
@@ -43,8 +48,8 @@ body::before {
   inset: -20%;
   z-index: -2;
   background:
-    radial-gradient(ellipse 50% 40% at 30% 0%, rgba(217, 140, 74, 0.1), transparent 70%),
-    radial-gradient(ellipse 45% 35% at 75% 100%, rgba(124, 109, 176, 0.09), transparent 70%);
+    radial-gradient(ellipse 50% 40% at 30% 0%, rgba(217, 140, 74, 0.16), transparent 70%),
+    radial-gradient(ellipse 45% 35% at 75% 100%, rgba(124, 109, 176, 0.14), transparent 70%);
   animation: drift 45s ease-in-out infinite alternate;
 }
 
@@ -202,7 +207,7 @@ h1 {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.75rem; /* open layout needs more air between turns */
   overflow-y: auto;
   padding-bottom: 1.5rem;
 }
@@ -266,14 +271,16 @@ h1 {
 
 .bubble {
   position: relative;
-  max-width: 90%;
-  padding: 1rem 1.2rem;
-  border-radius: var(--radius);
   line-height: 1.7;
   font-size: 0.92rem;
-  border: 1px solid var(--border);
-  background: var(--ink-2);
-  backdrop-filter: blur(10px);
+}
+
+/* Open layout: the assistant's words sit directly on the canvas — no box.
+   Only the user gets a bubble, so the eye separates the two voices by
+   shape, the modern chat idiom. */
+.msg.assistant .bubble {
+  max-width: 100%;
+  padding: 0.15rem 0;
 }
 /* ---------- rendered markdown inside answers ---------- */
 
@@ -322,25 +329,15 @@ h1 {
   line-height: 1.6;
 }
 
-/* Candlelight on the page: a soft ember line along the answer's top edge. */
-.msg.assistant .bubble::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 10%;
-  right: 10%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(240, 169, 96, 0.5), transparent);
-}
-
 .msg.user .bubble {
-  background: rgba(124, 109, 176, 0.14);
-  border-color: rgba(139, 124, 196, 0.2);
+  max-width: 85%;
+  padding: 0.75rem 1.1rem;
+  border-radius: var(--radius);
   border-bottom-right-radius: 6px;
+  background: rgba(124, 109, 176, 0.14);
+  border: 1px solid rgba(139, 124, 196, 0.2);
+  backdrop-filter: blur(10px);
   white-space: pre-wrap; /* user text is plain, keep their literal line breaks */
-}
-.msg.assistant .bubble {
-  border-bottom-left-radius: 6px;
 }
 
 /* ---------- loading: casting sigil, status line, streaming caret ---------- */
