@@ -13,19 +13,19 @@ in one sitting.
 
 **Open the tome.** A dictionary, because nobody should have to google the app's name:
 
-![Landing — the name, explained, with suggested questions](public/assets/landing.png)
+![Landing — the name, explained, with suggested questions](public/assets/landing.webp)
 
 **Ask it something.** Loading isn't theater here — each phase shows what the pipeline
 is actually doing. Retrieval finishes first, so the source files appear *before* the
 model speaks; while the LLM warms up, Grimoire tells you which page it's reading:
 
-![Answering — sources retrieved and shown while the model reads them](public/assets/answering.png)
+![Answering — sources retrieved and shown while the model reads them](public/assets/answering.webp)
 
 **Get a grounded answer.** Markdown-rendered, streamed token by token, with numbered
 citations that point at real chips below the answer. Hover a chip for its similarity
 score; hover the answer for one-click copy:
 
-![Answered — cited explanation of cosineSimilarity drawn from lib/rag.ts](public/assets/answered.png)
+![Answered — cited explanation of cosineSimilarity drawn from lib/rag.ts](public/assets/answered.webp)
 
 And if you ask it how to bake sourdough? *The tome holds no page on that.* When even
 the best retrieval match is weak (threshold calibrated against measured score
